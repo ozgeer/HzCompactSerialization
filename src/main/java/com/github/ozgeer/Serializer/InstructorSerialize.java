@@ -1,8 +1,8 @@
-package com.github.ozgeer.Serializer;
+package com.github.ozgeer.serializer;
 
 import java.util.UUID;
 
-import com.github.ozgeer.Faculty.Instructor;
+import com.github.ozgeer.faculty.Instructor;
 
 import com.hazelcast.nio.serialization.compact.CompactReader;
 import com.hazelcast.nio.serialization.compact.CompactSerializer;
@@ -13,15 +13,15 @@ public class InstructorSerialize implements CompactSerializer<Instructor> {
 	public Instructor read(CompactReader compactReader) {
 		String name = compactReader.readString("name");
 		Integer no = compactReader.readInt32("no");
-		UUID uuid =compactReader.readCompact("uuid");
-		return new Instructor(name, no, uuid);
+	//	UUID uuid =compactReader.readCompact("uuid");
+		return new Instructor(name, no);
 	}
 
 	@Override
 	public void write(CompactWriter compactWriter, Instructor instructor) {
 		compactWriter.writeString("name", instructor.getName());
 		compactWriter.writeInt32("no", instructor.getNo());
-		compactWriter.writeCompact("uuid",instructor.getUuid());
+		//compactWriter.writeCompact("uuid",instructor.getUuid());
 	}
 
 	@Override

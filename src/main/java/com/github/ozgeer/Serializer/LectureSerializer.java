@@ -1,12 +1,7 @@
-package com.github.ozgeer.Serializer;
+package com.github.ozgeer.serializer;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.github.ozgeer.Faculty.Instructor;
-import com.github.ozgeer.Faculty.Lecture;
-import com.github.ozgeer.Faculty.Student;
-
+import com.github.ozgeer.faculty.Instructor;
+import com.github.ozgeer.faculty.Lecture;
 import com.hazelcast.nio.serialization.compact.CompactReader;
 import com.hazelcast.nio.serialization.compact.CompactSerializer;
 import com.hazelcast.nio.serialization.compact.CompactWriter;
@@ -16,17 +11,17 @@ public class LectureSerializer implements CompactSerializer<Lecture> {
 	public Lecture read(CompactReader compactReader) {
 		String name = compactReader.readString("name");
 		Instructor instructor = compactReader.readCompact("instructor"); // onemli.
-		List<Student> studentList = Arrays.asList(compactReader.readArrayOfCompact("studentList", Student.class));
+		//	List<Student> studentList = Arrays.asList(compactReader.readArrayOfCompact("studentList", Student.class));
 		String content = compactReader.readString("content");
-		return new Lecture(name,instructor,studentList,content);
+		return new Lecture(name, instructor, content);
 	}
 
 	@Override
 	public void write(CompactWriter compactWriter, Lecture lecture) {
-		compactWriter.writeString("name",lecture.name());
-		compactWriter.writeCompact("instructor",lecture.instructor());
-		compactWriter.writeArrayOfCompact("studentList",lecture.listOfStudent().toArray());
-		compactWriter.writeString("content",lecture.content());
+		compactWriter.writeString("name", lecture.name());
+		compactWriter.writeCompact("instructor", lecture.instructor());
+		//	compactWriter.writeArrayOfCompact("studentList",lecture.listOfStudent().toArray());
+		compactWriter.writeString("content", lecture.content());
 
 	}
 
