@@ -1,4 +1,4 @@
-package com.github.ozgeer.Faculty;
+package com.github.ozgeer.faculty;
 
 import java.util.UUID;
 
@@ -8,12 +8,10 @@ public class Instructor {
 
 	int no;
 
-	UUID uuid;
-
-	public Instructor(String name, int no, UUID uuid) {
+	public Instructor(String name, int no) {
 		this.name = name;
 		this.no = no;
-		this.uuid=uuid;
+		 // this.uuid=uuid;
 	}
 
 	public String getName() {
@@ -32,22 +30,22 @@ public class Instructor {
 		this.no = no;
 	}
 
-	public UUID getUuid() {
-		return uuid;
-	}
+//	public UUID getUuid() {
+//		return uuid;
+//	}
+//
+//	public void setUuid(UUID uuid) {
+//		this.uuid = uuid;
+//	}
 
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
-	}
-
-	public static Instructor of(String name, int no, UUID uuid) {
-		return new Instructor(name, no, uuid);
+	public static Instructor of(String name, int no) {
+		return new Instructor(name, no);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder instructor = new StringBuilder();
-		instructor.append("name: ").append(getName()).append(", uuid: ").append(getUuid());
+		instructor.append("name: ").append(getName());
 		return instructor.toString();
 	}
 

@@ -1,15 +1,16 @@
-package com.github.ozgeer.Faculty;
+package com.github.ozgeer.faculty;
 
 import java.util.List;
 
-public record Lecture(String name, Instructor instructor, List<Student> listOfStudent, String content) {
 
-	public Lecture(String name, Instructor instructor, List<Student> listOfStudent) {
-		this(name, instructor, listOfStudent, null);
+public record Lecture(String name, Instructor instructor, String content) {
+
+	public Lecture(String name, Instructor instructor) {
+		this(name, instructor,null);
 	}
 
-	public static Lecture of(String name, Instructor instructor, List<Student> listOfStudent) {
-		return new Lecture(name, instructor, listOfStudent);
+	public static Lecture of(String name, Instructor instructor) {
+		return new Lecture(name, instructor,null);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.github.ozgeer.Faculty;
+package com.github.ozgeer.faculty;
 
 import java.util.HashMap;
 
