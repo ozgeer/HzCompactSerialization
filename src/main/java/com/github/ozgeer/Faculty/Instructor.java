@@ -1,7 +1,5 @@
 package com.github.ozgeer.faculty;
 
-import java.util.UUID;
-
 public class Instructor {
 
 	String name;
@@ -45,7 +43,7 @@ public class Instructor {
 	@Override
 	public String toString() {
 		StringBuilder instructor = new StringBuilder();
-		instructor.append("name: ").append(getName());
+		instructor.append("[name:").append(getName()).append(" no:").append(getNo()).append("]");
 		return instructor.toString();
 	}
 
