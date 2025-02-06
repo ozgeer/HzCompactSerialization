@@ -31,8 +31,8 @@ public class HazelcastInitialize {
 				.addSerializer(new StudentSeriliazer()) //
 				.addSerializer(new LectureSerializer()) //
 				.addSerializer(new InstructorSerialize()) //
-				.addSerializer(new EntrySerializer()) //
-				.addSerializer(new org.example.serializer.UUIDSerializer());
+				.addSerializer(new EntrySerializer());//
+		//		.addSerializer(new org.example.serializer.UUIDSerializer());
 
 		JoinConfig joinConfig = config.getNetworkConfig().getJoin();
 		joinConfig.getMulticastConfig().setEnabled(false); // Multicast'i devre dışı bıraktık

@@ -33,8 +33,8 @@ public class Main {
 		IMap<Integer, Lecture> lectureMap = hazelcastInstance.getMap("lectureMap");
 		lectureMap.addIndex(IndexType.HASH, "name");
 
-		Instructor instructor = Instructor.of("Veli", 12, UUID.randomUUID());
-		Instructor instructor1 = Instructor.of("Hasan", 13,UUID.randomUUID());
+		Instructor instructor = Instructor.of("Veli", 12);
+		Instructor instructor1 = Instructor.of("Hasan", 13);
 
 		instructorMap.put(90, instructor);
 		instructorMap.put(80, instructor1);
