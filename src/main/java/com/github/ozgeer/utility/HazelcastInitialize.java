@@ -1,5 +1,8 @@
 package com.github.ozgeer.utility;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.stereotype.Component;
@@ -25,7 +28,7 @@ public class HazelcastInitialize {
 
 	public static Config config() {
 		Config config = new Config();
-		config.getJetConfig().setEnabled(true); // sql sorgularını desteklemesi için bunun true setlenmesi gerekiyor.
+		config.getJetConfig().setEnabled(true); // shall adjust as true to support sql queries.
 		config.setClusterName("dev");
 		config.getSerializationConfig()//
 				.getCompactSerializationConfig() //
@@ -37,14 +40,13 @@ public class HazelcastInitialize {
 		//		.addSerializer(new org.example.serializer.UUIDSerializer());
 
 		JoinConfig joinConfig = config.getNetworkConfig().getJoin();
-		joinConfig.getMulticastConfig().setEnabled(false); // Multicast'i devre dışı bıraktık
-		joinConfig.getTcpIpConfig().setEnabled(true).addMember(
-				"172.17.0.3:5701"); // Docker'daki IP ve port. burada bir yanlışlık var suanda gibi. emin değilim.
+		joinConfig.getMulticastConfig().setEnabled(false); // disabled the multicasting
+		joinConfig.getTcpIpConfig().setEnabled(true).addMember("172.17.0.3:5701"); // IP and port information on Docker.
 		return config;
 	}
 
 	public static void Query(HazelcastInstance hazelcastInstance) {
-		// CREATE MAPPING
+		// CREATE MAPPING FOR INSTRUCTOR
 		String createInstructorMappingQuery = """
 				    CREATE OR REPLACE EXTERNAL MAPPING "hazelcast"."public"."instructorMap"\s
 				        EXTERNAL NAME "instructorMap" (
@@ -61,20 +63,19 @@ public class HazelcastInitialize {
 				        );
 				""";
 
-		// Mapping'i oluştur
+		// Logging
 		try (SqlResult result = hazelcastInstance.getSql().execute(createInstructorMappingQuery)) {
-			logger.info("Instructor Mapping created successfully.");
+			logger.info("Instructor mapping created successfully.");
 		}
 
 		String sql = "SELECT this FROM instructorMap WHERE name='Veli'";
 		try (SqlResult result = hazelcastInstance.getSql().execute(sql)) {
 			for (SqlRow row : result) {
-				//	String key = row.getObject("__key"); // key
 				Instructor studentExample = row.getObject(0); //value
 				logger.info("Instructor: " + studentExample);
 			}
 		}
-
+		// CREATE MAPPING FOR LECTURE
 		String createLectureMappingQuery = """
 				    CREATE OR REPLACE EXTERNAL MAPPING "hazelcast"."public"."lectureMap"\s
 				        EXTERNAL NAME "lectureMap" (
@@ -91,9 +92,9 @@ public class HazelcastInitialize {
 				          'valueCompactTypeName'='lecture'
 				        );
 				""";
-
+		// Logging
 		try (SqlResult lectureResult = hazelcastInstance.getSql().execute(createLectureMappingQuery)) {
-			logger.info("Lecture Mapping created successfully.");
+			logger.info("Lecture mapping created successfully.");
 		}
 
 		String lectureSql = "SELECT this FROM lectureMap WHERE name='Math'";
@@ -105,6 +106,40 @@ public class HazelcastInitialize {
 				logger.info(String.valueOf(lecture));
 			}
 		}
+		//CREATE MAPPING FOR STUDENT
+		String createStudentMappingQuery = """
+				    CREATE OR REPLACE EXTERNAL MAPPING "hazelcast"."public"."studentMap"\s
+				        EXTERNAL NAME "studentMap" (
+				          "__key" INTEGER ,
+				          "name" VARCHAR EXTERNAL NAME "this.name",
+				          "no" INTEGER EXTERNAL NAME "this.no",
+				          "faculty" VARCHAR EXTERNAL NAME "this.faculty"
+				        )
+				        TYPE "IMap"
+				        OPTIONS (
+				          'keyFormat'='java',
+				          'keyJavaClass'='java.lang.Integer',
+				          'valueFormat'='compact',
+				          'valueCompactTypeName'='student'
+				        );
+								
+				""";
+		//Logging
+		try (SqlResult studentResult = hazelcastInstance.getSql().execute(createStudentMappingQuery)) {
+			logger.info("Student mapping created successfully.");
+		}
+
+		String studentSql = "SELECT name,faculty FROM studentMap";
+
+		try (SqlResult studentResult = hazelcastInstance.getSql().execute(studentSql)) {
+			for(SqlRow row : studentResult){
+				String name = row.getObject("name");
+				String facultyName = row.getObject("faculty");
+				logger.log(Level.INFO,name + "," + facultyName);
+
+
+			}
 		}
 	}
+}
 

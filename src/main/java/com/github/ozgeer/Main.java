@@ -54,7 +54,8 @@ public class Main {
 		Student student1 = new Student("Mavi", 3, Faculty.ENGINEERING, "electronic", mapOfLecture);
 
 		studentMap.put("sari", student);
-		studentMap2.put("yesil", student1);
+		studentMap.put("yesil", student1);
+		studentMap.put("pembe",student);
 
 		HazelcastInitialize.Query(hazelcastInstance);
 	}
