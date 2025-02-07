@@ -2,9 +2,9 @@ package com.github.ozgeer.serializer;
 
 import java.util.HashMap;
 
+import com.github.ozgeer.faculty.Faculty;
 import com.github.ozgeer.faculty.Lecture;
 import com.github.ozgeer.faculty.Student;
-
 import com.github.ozgeer.utility.Entry;
 import com.hazelcast.nio.serialization.compact.CompactReader;
 import com.hazelcast.nio.serialization.compact.CompactSerializer;
@@ -16,6 +16,7 @@ public class StudentSeriliazer implements CompactSerializer<Student> {
 		String name = compactReader.readString("name");
 		int no = compactReader.readInt32("no");
 		String department = compactReader.readString("department");
+		Faculty faculty = compactReader.readCompact("faculty");
 
 		//List<Lecture> lectureList = Arrays.asList(compactReader.readArrayOfCompact("listOfLecture", Lecture.class));
 
@@ -25,7 +26,7 @@ public class StudentSeriliazer implements CompactSerializer<Student> {
 		for (Entry entry : lectureArray) {
 			lectures.put((Integer) entry.getKey(), (Lecture) entry.getValue());
 		}
-		return new Student(name, no, department, lectures);
+		return new Student(name, no, faculty, department, lectures);
 	}
 
 //		HashMap<Lecture, Instructor> match= new HashMap<>();
@@ -41,6 +42,7 @@ public class StudentSeriliazer implements CompactSerializer<Student> {
 	public void write(CompactWriter compactWriter, Student student) {
 		compactWriter.writeString("name", student.name());
 		compactWriter.writeInt32("no", student.no());
+		compactWriter.writeString("faculty", String.valueOf(student.faculty()));
 		compactWriter.writeString("department", student.department());
 		//compactWriter.writeArrayOfCompact("listOfLecture", student.listOfLecture().toArray());
 

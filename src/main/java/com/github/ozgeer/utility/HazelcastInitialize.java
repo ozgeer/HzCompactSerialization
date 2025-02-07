@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
 
 import com.github.ozgeer.Main;
+import com.github.ozgeer.faculty.Faculty;
 import com.github.ozgeer.faculty.Instructor;
 import com.github.ozgeer.faculty.Lecture;
 import com.github.ozgeer.serializer.EntrySerializer;
@@ -31,7 +32,8 @@ public class HazelcastInitialize {
 				.addSerializer(new StudentSeriliazer()) //
 				.addSerializer(new LectureSerializer()) //
 				.addSerializer(new InstructorSerialize()) //
-				.addSerializer(new EntrySerializer());//
+				.addSerializer(new EntrySerializer())//
+				.addClass(Faculty.class);
 		//		.addSerializer(new org.example.serializer.UUIDSerializer());
 
 		JoinConfig joinConfig = config.getNetworkConfig().getJoin();

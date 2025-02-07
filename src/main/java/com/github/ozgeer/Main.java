@@ -1,9 +1,9 @@
 package com.github.ozgeer;
 
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.github.ozgeer.faculty.Faculty;
 import com.github.ozgeer.faculty.Instructor;
 import com.github.ozgeer.faculty.Lecture;
 import com.github.ozgeer.faculty.Student;
@@ -50,8 +50,8 @@ public class Main {
 		mapOfLecture.put(1, lecture1);
 		mapOfLecture.put(2, lecture2);
 
-		Student student = new Student("Ozge", 2, "electronic", mapOfLecture);
-		Student student1 = new Student("Mavi", 3, "electronic", mapOfLecture);
+		Student student = new Student("Ozge", 2, Faculty.ENGINEERING, "electronic", mapOfLecture);
+		Student student1 = new Student("Mavi", 3, Faculty.ENGINEERING, "electronic", mapOfLecture);
 
 		studentMap.put("sari", student);
 		studentMap2.put("yesil", student1);
