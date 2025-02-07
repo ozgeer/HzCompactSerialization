@@ -61,7 +61,7 @@ public class HazelcastInitialize {
 
 		// Mapping'i oluştur
 		try (SqlResult result = hazelcastInstance.getSql().execute(createInstructorMappingQuery)) {
-			System.out.println("Instructor Mapping created successfully.");
+			logger.info("Instructor Mapping created successfully.");
 		}
 
 		String sql = "SELECT this FROM instructorMap WHERE name='Veli'";
@@ -69,7 +69,7 @@ public class HazelcastInitialize {
 			for (SqlRow row : result) {
 				//	String key = row.getObject("__key"); // key
 				Instructor studentExample = row.getObject(0); //value
-				System.out.println("Instructor: " + studentExample);
+				logger.info("Instructor: " + studentExample);
 			}
 		}
 
@@ -91,7 +91,7 @@ public class HazelcastInitialize {
 				""";
 
 		try (SqlResult lectureResult = hazelcastInstance.getSql().execute(createLectureMappingQuery)) {
-			System.out.println("Lecture Mapping created successfully.");
+			logger.info("Lecture Mapping created successfully.");
 		}
 
 		String lectureSql = "SELECT this FROM lectureMap WHERE name='Math'";
@@ -100,7 +100,7 @@ public class HazelcastInitialize {
 			for (SqlRow row : lectureResult) {
 				Lecture lecture = row.getObject(0);
 				Instructor instructor_name = lecture.instructor();
-				System.out.println(lecture);
+				logger.info(String.valueOf(lecture));
 			}
 		}
 		}
