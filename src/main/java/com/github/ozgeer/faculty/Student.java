@@ -1,38 +1,27 @@
 package com.github.ozgeer.faculty;
 
+import java.util.Date;
 import java.util.HashMap;
-
-import com.github.ozgeer.smf.model.SessionRule;
 
 public class Student {
 	private String name;
-	private int no;
+	private Integer studentNo;
+	private Date registerDate;
 	private Faculty faculty;
 	private String department;
 	private HashMap<Integer, Lecture> lectureHashMap;
-	private String field1;
-
-	private String field4;
 
 	private College collegeName;
 
-	private SessionRule sessionRule;
-
-	public Student(String name, int no, Faculty faculty, String department, HashMap<Integer, Lecture> lectureHashMap, String field1
-			//	, String field2
-			//	, int field3
-			, String field4, College collegeName, SessionRule sessionRule) {
+	public Student(String name, Integer no, Date registerDate, Faculty faculty, String department, HashMap<Integer, Lecture> lectureHashMap,
+			College collegeName) {
 		this.name = name;
-		this.no = no;
+		this.studentNo = no;
+		this.registerDate = registerDate;
 		this.faculty = faculty;
 		this.department = department;
 		this.lectureHashMap = lectureHashMap;
-		this.field1 = field1;
-		//	this.field2 = field2;
-		//	this.field3 = field3;
-		this.field4 = field4;
 		this.collegeName = collegeName;
-		this.sessionRule = sessionRule;
 	}
 
 	public Student() {
@@ -42,8 +31,16 @@ public class Student {
 		return name;
 	}
 
-	public int getNo() {
-		return no;
+	public Integer getNo() {
+		return studentNo;
+	}
+
+	public Date getRegisterDate() {
+		return registerDate;
+	}
+
+	public void setRegisterDate(Date registerDate) {
+		this.registerDate = registerDate;
 	}
 
 	public Faculty getFaculty() {
@@ -58,24 +55,16 @@ public class Student {
 		return lectureHashMap;
 	}
 
-	public String getField1() {
-		return field1;
+	public College getCollegeName() {
+		return collegeName;
 	}
-
-	//	public String getField2() {
-	//		return field2;
-	//	}
-	//
-	//	public int getField3() {
-	//		return field3;
-	//	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	public void setNo(int no) {
-		this.no = no;
+		this.studentNo = no;
 	}
 
 	public void setFaculty(Faculty faculty) {
@@ -89,29 +78,10 @@ public class Student {
 	public void setLectureHashMap(HashMap<Integer, Lecture> lectureHashMap) {
 	}
 
-/*	public QosParameters getQosParameters() {
-		return qosParameters;
-	}
-
-	public void setQosParameters(QosParameters qosParameters) {
-		this.qosParameters = qosParameters;
-	}*/
-
-	public SessionRule getSessionRule() {
-		return sessionRule;
-	}
-
-	public void setSessionRule(SessionRule sessionRule) {
-		this.sessionRule = sessionRule;
-	}
-
 	@Override
 	public String toString() {
-		return "Student{" + "name='" + name + '\'' + ", no=" + no + ", faculty=" + faculty + ", department='" + department + '\'' + ", lectureHashMap="
-				+ lectureHashMap + ", field1='" + field1 + '\'' +
-				//				", field2='" + field2 + '\'' +
-				//				", field3=" + field3 +
-				", field4=" + field4 + ", collegeName=" + collegeName + "sessionRule=" + sessionRule + '}';
+		return "Student{" + "name='" + name + '\'' + ", no=" + studentNo + ", faculty=" + faculty + ", department='" + department + '\'' + ", lectureHashMap="
+				+ lectureHashMap + ", collegeName=" + collegeName + '}';
 	}
 }
 

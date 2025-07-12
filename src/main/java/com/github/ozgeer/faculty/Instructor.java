@@ -6,38 +6,22 @@ public class Instructor {
 
 	String name;
 
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
-
 	String surname;
 
 	int no;
 
 	UUID uuid;
 
-	public void setCollege(College college) {
-		this.college = college;
-	}
-
 	College college;
 
 	public Instructor() {
 	}
 
-	public Instructor(String name, String surname
-			//, int no
-			, College college
+	public Instructor(String name, String surname, College college
 	) {
 		this.name = name;
 		this.surname = surname;
-	//	this.no = no;
 		this.college = college;
-
 	}
 
 	public String getName() {
@@ -46,6 +30,14 @@ public class Instructor {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getSurname() {
+		return surname;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
 	}
 
 	public int getNo() {
@@ -60,13 +52,9 @@ public class Instructor {
 		return college;
 	}
 
-	public static Instructor of(String name, String surname
-			//, int no
-		, College college
+	public static Instructor of(String name, String surname, College college
 	) {
-		return new Instructor(name, surname
-				//, no
-				,college
+		return new Instructor(name, surname,college
 		);
 	}
 

@@ -1,13 +1,29 @@
 package com.github.ozgeer.faculty;
 
+import java.net.InetAddress;
+import java.net.URI;
+
 public class College {
+	String collegeName;
+
+	String collegeCity;
+
+	URI collegeURI;
+
+	private InetAddress ipAddress;
+
+	public College() {
+
+	}
+
+	public College(String name, URI uri, InetAddress ipAddress) {
+		this.collegeName = name;
+		this.collegeURI = uri;
+		this.ipAddress = ipAddress;
+	}
 
 	public String getCollegeName() {
 		return collegeName;
-	}
-
-	public void setCollegeName(String collegeName) {
-		this.collegeName = collegeName;
 	}
 
 	public String getCollegeCity() {
@@ -18,23 +34,30 @@ public class College {
 		this.collegeCity = collegeCity;
 	}
 
-	String collegeName;
-
-	String collegeCity;
-
-	public College() {
-
+	public URI getCollegeURI() {
+		return collegeURI;
 	}
 
-	public College(String name) {
-		this.collegeName = name;
+	public void setCollegeURI(URI collegeURI) {
+		this.collegeURI = collegeURI;
 	}
+
+
+	public InetAddress  getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(InetAddress ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+
 
 	@Override
 	public String toString() {
 		return "College{" +
-				"collegeName='" + collegeName + '\'' +
-				", collegeCity='" + collegeCity + '\'' +
+				"collegeName='" + collegeName + '\'' + ", collegeCity='" + collegeCity + '\'' + ", collegeURI='" + collegeURI + '\'' + ", collegeIP='"
+				+ getIpAddress() + '\'' +
 				'}';
 	}
 }

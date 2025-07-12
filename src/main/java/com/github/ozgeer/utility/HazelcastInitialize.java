@@ -1,21 +1,16 @@
 package com.github.ozgeer.utility;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,28 +18,23 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.github.ozgeer.serializer.InstructorSerializer;
-import com.github.ozgeer.serializer.EntrySerializer;
-import com.github.ozgeer.serializer.FacultySerializer;
 
 import org.springframework.stereotype.Component;
 
 import com.github.ozgeer.Main;
+import com.github.ozgeer.faculty.College;
 import com.github.ozgeer.faculty.Faculty;
 import com.github.ozgeer.faculty.Instructor;
 import com.github.ozgeer.faculty.Lecture;
 import com.github.ozgeer.faculty.Student;
-import com.github.ozgeer.smf.model.BindingParameters;
-import com.github.ozgeer.smf.model.QosParameters;
-import com.github.ozgeer.smf.model.SessionRule;
-import com.github.ozgeer.smf.serializer.BindingParametersSerializer;
-import com.github.ozgeer.smf.serializer.QosParametersSerializer;
+import com.github.ozgeer.serializer.CollegeSerializer;
+import com.github.ozgeer.serializer.EntrySerializer;
+import com.github.ozgeer.serializer.FacultySerializer;
+import com.github.ozgeer.serializer.InstructorSerializer;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.CompactSerializationConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.internal.util.BiTuple;
-import com.hazelcast.nio.serialization.HazelcastSerializationException;
 import com.hazelcast.nio.serialization.compact.CompactReader;
 import com.hazelcast.nio.serialization.compact.CompactSerializer;
 import com.hazelcast.sql.SqlResult;
@@ -70,175 +60,22 @@ public class HazelcastInitialize {
 		clientConfig.getSerializationConfig().setEnableCompression(true);
 
 		ClientNetworkConfig networkConfig = clientConfig.getNetworkConfig();
-		networkConfig.addAddress("172.30.40.164:5701"); // Use the HOST IP address of the Docker container
+		networkConfig.addAddress("10.22.216.243:5701"); // Use the HOST IP address of the Docker container
 		// Optional: configure timeouts, retries, etc.
 		networkConfig.setSmartRouting(true);
 		networkConfig.setConnectionTimeout(5000);
 
-		//		compactConfig.addClass(Student.class);
-		//		compactConfig.addClass(Lecture.class);
-		//		compactConfig.addClass(College.class);
-		//
-		//		compactConfig.addSerializer(new InstructorSerializer()) //
-		//				.addSerializer(new EntrySerializer()) //
-		//				.addSerializer(new FacultySerializer());
+		CompactSerializationConfig compactConfig = clientConfig.getSerializationConfig().getCompactSerializationConfig();
 
-		if (compactSerialization) {
-			Set<Class<?>> selectedTypes = new HashSet<>();
+		compactConfig.addClass(Student.class);
+		compactConfig.addClass(Lecture.class);
+		compactConfig.addClass(College.class);
 
-			for (Class<?> clazz : CLAZZES_FOR_COMPACT_REGISTRATION) {
-				addClazzToCompactSerialization(clazz, selectedTypes);
-			}
-
-			CompactSerializationConfig compactConfig = clientConfig.getSerializationConfig().getCompactSerializationConfig();
-			for (Supplier<CompactSerializer> customSerializer : CUSTOM_SERIALIZED_CLASSES.values()) {
-				compactConfig.addSerializer(customSerializer.get());
-			}
-
-			for (Class<?> type : selectedTypes) {
-				if (!CUSTOM_SERIALIZED_CLASSES.containsKey(type)) {
-					compactConfig.addClass(type);
-				}
-			}
-		}
+		compactConfig.addSerializer(new InstructorSerializer()) //
+				.addSerializer(new EntrySerializer()) //
+				.addSerializer(new FacultySerializer());
 		return clientConfig;
-	}
 
-	public static void addClazzToCompactSerialization(Class<?> clazzToCheck, Set<Class<?>> selectedTypes) {
-		selectedTypes.add(clazzToCheck);
-
-		Set<Field> fieldsToCheck = getAllFields(new HashSet<>(), clazzToCheck);
-
-		Set<Field> newFieldsToCheck;
-		do {
-			newFieldsToCheck = filterFieldsToAddCompactSerialization(fieldsToCheck, selectedTypes);
-			fieldsToCheck.clear();
-			fieldsToCheck.addAll(newFieldsToCheck);
-		} while (!newFieldsToCheck.isEmpty());
-	}
-
-	private static Set<Field> getAllFields(Set<Field> clazzFields, Class<?> type) {
-		Collections.addAll(clazzFields, type.getDeclaredFields());
-		if (type.getSuperclass() != null && type.getSuperclass() != Object.class) {
-			getAllFields(clazzFields, type.getSuperclass());
-		}
-		return clazzFields;
-	}
-
-	public static Set<Field> filterFieldsToAddCompactSerialization(Set<Field> fieldsToCheck, Set<Class<?>> selectedTypes) {
-		Set<Field> newFieldsToCheck = new HashSet<>();
-		for (Iterator i = fieldsToCheck.iterator(); i.hasNext(); ) {
-			Field f = (Field) i.next();
-			Set<Class<?>> typesOfField = new HashSet<>();
-
-			if (!checkField(f)) {
-				continue;
-			}
-
-			Class<?> type = f.getType();
-			if (!registerForCompactSerialization(type)) {
-				continue;
-			} else if (type.isArray()) {
-				if (registerForCompactSerialization(type.getComponentType()))
-					typesOfField.add(type.getComponentType());
-			} else if (List.class.equals(type) || Set.class.equals(type)) {
-				if (registerForCompactSerialization(getSingleComponentType(f.getGenericType())))
-					typesOfField.add(getSingleComponentType(f.getGenericType()));
-			} else if (Map.class.equals(type) || HashMap.class.equals(type)) {
-				BiTuple<Class<?>, Class<?>> componentTypes = null;
-				try {
-					componentTypes = getTupleComponentTypes(f.getGenericType());
-				} catch (HazelcastSerializationException e) {
-					if (CUSTOM_SERIALIZED_CLASSES.containsKey(f.getDeclaringClass())) {
-						//						nloggerPmStart.atDebug(Marks.IMDG.marker).log("C.FNAME = {} , C.PCLASS = {} , C.FTYPE = {} , C.STYPES = {}", f.getName(),
-						//								f.getDeclaringClass().getSimpleName(), f.getType().getSimpleName(), typesOfField);
-
-						logger.info("mapte sorun var.");
-						continue;
-					}
-
-					throw e;
-				}
-				if (registerForCompactSerialization(componentTypes.element1)) {
-					typesOfField.add(componentTypes.element1);
-				}
-				if (registerForCompactSerialization(componentTypes.element2)) {
-					typesOfField.add(componentTypes.element2);
-				}
-			} else {
-				typesOfField.add(type);
-			}
-
-			if (!typesOfField.isEmpty()) {
-				for (Class<?> t : typesOfField) {
-					if (selectedTypes.add(t)) {
-						Set<Field> declaredFields = getAllFields(new HashSet<>(), t);
-						declaredFields.addAll(newFieldsToCheck);
-					}
-				}
-			}
-		} // end of fields
-
-		return newFieldsToCheck;
-	}
-
-	public static boolean checkField(Field f) {
-		boolean needSerialization = true;
-
-		if (Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) {
-			needSerialization = false;
-		}
-
-		return needSerialization;
-	}
-
-	private static boolean registerForCompactSerialization(Class<?> type) {
-		boolean registerForZeroConfigSerialization = true;
-
-		if (TYPES_TO_ID.containsKey(type) || type.isEnum()) {
-			registerForZeroConfigSerialization = false;
-		}
-
-		return registerForZeroConfigSerialization;
-	}
-
-	public static Class<?> getSingleComponentType(Type genericType) {
-		if (!(genericType instanceof ParameterizedType)) {// List,Set veya Map mi diye kontrol ediyor. runtime da parameterized ile temsil ediliyorlar.
-			throw new HazelcastSerializationException("It is required that the type " + genericType + " must be parameterized.");
-		}
-
-		ParameterizedType parameterizedType = (ParameterizedType) genericType;
-		Type[] typeArguments = parameterizedType.getActualTypeArguments();
-		if (typeArguments.length != 1) { //map olup olmadıgını kontrol ediyor
-			throw new HazelcastSerializationException("Expected type " + genericType + " to have a single type argument.");
-		}
-
-		Type typeArgument = typeArguments[0];
-		if (!(typeArgument instanceof Class)) {
-			throw new HazelcastSerializationException("Expected type argument of type " + genericType + " to be a class");
-		}
-
-		return (Class<?>) typeArgument;
-	}
-
-	public static BiTuple<Class<?>, Class<?>> getTupleComponentTypes(Type genericType) {
-		if (!(genericType instanceof ParameterizedType)) {
-			throw new HazelcastSerializationException("Expected the type " + genericType + " to be parameterized.");
-		}
-
-		ParameterizedType parameterizedType = (ParameterizedType) genericType;
-		Type[] typeArguments = parameterizedType.getActualTypeArguments();
-		if (typeArguments.length != 2) {
-			throw new HazelcastSerializationException("Expected type " + genericType + " to have two type arguments.");
-		}
-
-		Type keyTypeArgument = typeArguments[0];
-		Type valueTypeArgument = typeArguments[1];
-		if (!(keyTypeArgument instanceof Class) || !(valueTypeArgument instanceof Class)) {
-			throw new HazelcastSerializationException("Expected type arguments of type " + genericType + " to be classes");
-		}
-
-		return BiTuple.of((Class<?>) keyTypeArgument, (Class<?>) valueTypeArgument);
 	}
 
 
@@ -382,13 +219,11 @@ public class HazelcastInitialize {
 		Class<?> singleArrayInt = Array.newInstance(Integer.TYPE, 0).getClass();
 		TYPES_TO_ID.put(Array.newInstance(singleArrayInt, 0).getClass(), -4); //Two dimensional int array
 		CLAZZES_FOR_COMPACT_REGISTRATION.add(Student.class);
-		CLAZZES_FOR_COMPACT_REGISTRATION.add(SessionRule.class);
 
+		CUSTOM_SERIALIZED_CLASSES.put(College.class, CollegeSerializer::new);
 		CUSTOM_SERIALIZED_CLASSES.put(Instructor.class, InstructorSerializer::new);
 		CUSTOM_SERIALIZED_CLASSES.put(Entry.class, EntrySerializer::new);
 		CUSTOM_SERIALIZED_CLASSES.put(Faculty.class, FacultySerializer::new);
-		CUSTOM_SERIALIZED_CLASSES.put(BindingParameters.class, BindingParametersSerializer::new);
-		CUSTOM_SERIALIZED_CLASSES.put(QosParameters.class,QosParametersSerializer::new);
 	}
 }
 

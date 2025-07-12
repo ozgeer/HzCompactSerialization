@@ -1,5 +1,8 @@
 package com.github.ozgeer;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -8,9 +11,6 @@ import com.github.ozgeer.faculty.Faculty;
 import com.github.ozgeer.faculty.Instructor;
 import com.github.ozgeer.faculty.Lecture;
 import com.github.ozgeer.faculty.Student;
-import com.github.ozgeer.smf.model.BindingParameters;
-import com.github.ozgeer.smf.model.QosParameters;
-import com.github.ozgeer.smf.model.SessionRule;
 import com.github.ozgeer.utility.HazelcastInitialize;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -22,7 +22,7 @@ public class Main {
 
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnknownHostException {
 
 		ClientConfig config = HazelcastInitialize.config();
 
@@ -37,8 +37,10 @@ public class Main {
 		IMap<Integer, Lecture> lectureMap = hazelcastInstance.getMap("lectureMap");
 		lectureMap.addIndex(IndexType.HASH, "name");
 
-		Instructor instructor = Instructor.of("AHMET", "Ogut", new College("college1"));
-		Instructor instructor1 = Instructor.of("CEVDET", "Yılmaz", new College("college2"));
+		InetAddress ipAddress = InetAddress.getByName("172.30.40.12");
+
+		Instructor instructor = Instructor.of("AHMET", "Ogut", new College("college1", URI.create("www.sau"), ipAddress));
+		Instructor instructor1 = Instructor.of("CEVDET", "Yılmaz", new College("college2", URI.create("www.bau"), ipAddress));
 
 		instructorMap.put(90, instructor);
 		instructorMap.put(80, instructor1);
@@ -54,17 +56,11 @@ public class Main {
 		mapOfLecture.put(1, lecture1);
 		mapOfLecture.put(2, lecture2);
 
-		//		Student student = new Student("Ozge", 2, Faculty.ENGINEERING, "industry", mapOfLecture, "test1", "field2", 1);
-		//		Student student1 = new Student("Ozgur", 3, Faculty.ENGINEERING, "chemistry", mapOfLecture, "test2", "field2", 2);
+		Student student = new Student("Ozge", 2, Faculty.ENGINEERING, "industry", mapOfLecture, new College("SAU", URI.create("www.sau"), ipAddress));
+		Student student1 = new Student("Mehmet", 3, Faculty.ENGINEERING, "chemistry", mapOfLecture, new College("SUBU", URI.create("www" + ".bau"), ipAddress));
 
-		Student student = new Student("Ozge", 2, Faculty.ENGINEERING, "industry", mapOfLecture, "test3", "field4", new College("SAU"),
-				new SessionRule("stringId1", new QosParameters(), null, null));
-		Student student1 = new Student("Mehmet", 3, Faculty.ENGINEERING, "chemistry", mapOfLecture, "test4", "field4", new College("SUBU"),
-				new SessionRule("stringId",
-						new QosParameters("167", new BindingParameters(true, 1, null, false, 2, 3, 4), null, null, null, null, true, "newField"), null, null));
-
-		studentMap.put("sari", student);
-		studentMap.put("yesil", student1);
+		studentMap.put("sari1", student);
+		studentMap.put("yesil1", student1);
 
 		HazelcastInitialize.Query(hazelcastInstance);
 		//		Set<String>  keys = studentMap.keySet();
@@ -75,6 +71,7 @@ public class Main {
 			System.out.println("-----------------------------------------------------------------------------------------");
 			System.out.println(item.toString());
 		}
+
 	}
 
 		//List<Student> liste = map2.values().stream().filter(x -> x.name().equals("Mavi")).collect(Collectors.toList());

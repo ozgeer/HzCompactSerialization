@@ -49,6 +49,7 @@ public class EntrySerializer implements CompactSerializer<Entry<?, ?>> {
 	// dynamic value read
 	private Object readDynamicValue(CompactReader reader, String fieldName, String type) {
 		switch (type) {
+		//it may diversify
 		case "java.lang.Integer":
 			return reader.readInt32(fieldName);
 		case "java.lang.String":
@@ -61,6 +62,7 @@ public class EntrySerializer implements CompactSerializer<Entry<?, ?>> {
 	// dynamic value write
 	private void writeDynamicValue(CompactWriter writer, String fieldName, Object value, String type) {
 		switch (type) {
+		// it may diversify
 		case "java.lang.Integer":
 			writer.writeInt32(fieldName, (Integer) value);
 			break;
